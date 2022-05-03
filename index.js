@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express();
-const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const cors = require('cors');
 require('dotenv').config()
@@ -13,13 +13,11 @@ app.use(express.json())
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zat3w.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
-console.log(uri)
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 async function run() {
     try {
         await client.connect();
         const booksCollection = client.db("bookInventory").collection("books");
-        console.log(booksCollection)
         app.get('/books', async (req, res) => {
             const query = {};
             const cursor = booksCollection.find(query);
@@ -28,9 +26,23 @@ async function run() {
         })
         app.get('/books/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: ObjectId(id)};
+            const query = { _id: ObjectId(id) };
             const book = await booksCollection.findOne(query);
             res.send(book)
+        })
+        app.put('/books/:id', async (req, res) => {
+            const id = req.params.id
+            const quantity = req.body.quantity;
+            console.log(quantity)
+            const filter = { _id: ObjectId(id)};
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: quantity
+                },
+              };
+            const result = await booksCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
         })
     }
     finally {
