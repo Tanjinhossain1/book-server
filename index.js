@@ -69,7 +69,12 @@ async function run() {
             res.send(result)
         })
         // Delete book inventory
-       
+        app.delete('/deleteBook/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const bookDelete = await booksCollection.deleteOne(query);
+            res.send(bookDelete)
+        })
     }
     finally {
         // client.close();
