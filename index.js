@@ -18,22 +18,31 @@ async function run() {
     try {
         await client.connect();
         const booksCollection = client.db("bookInventory").collection("books");
+        // get all books 
         app.get('/books', async (req, res) => {
             const query = {};
             const cursor = booksCollection.find(query);
             const books = await cursor.toArray();
             res.send(books)
         })
+        // add book with id 
         app.get('/books/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const book = await booksCollection.findOne(query);
             res.send(book)
         })
+        // add new book itemd
+        app.post('/books', async (req,res)=>{
+            const newBook = req.body;
+            const result = await booksCollection.insertOne(newBook);
+            res.send(result)
+        })
+        //  quantity delete
         app.put('/books/:id', async (req, res) => {
             const id = req.params.id
-            const quantity = req.body.quantity;
-            console.log(quantity)
+            const quantity = req.body.quantitys;
+            
             const filter = { _id: ObjectId(id)};
             const options = { upsert: true };
             const updateDoc = {
@@ -44,6 +53,23 @@ async function run() {
             const result = await booksCollection.updateOne(filter, updateDoc, options);
             res.send(result)
         })
+        // update bookQuantity 
+        app.put('/bookNewQuantity/:id', async (req, res) => {
+            const id = req.params.id
+            const quantity = req.body.addNewQuantity;
+            // console.log(newQuantity)
+            const filter = { _id: ObjectId(id)};
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    quantity: quantity
+                },
+              };
+            const result = await booksCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+        // Delete book inventory
+       
     }
     finally {
         // client.close();
