@@ -30,8 +30,7 @@ async function run() {
             const token = req.headers.authorization;
             const [email, accessToken] = token.split(' ')
             // console.log(email)
-        
-          
+            const decoded = verifyToken(accessToken)
             const query = {email: email};
             if (decoded.email === email) {
                 const cursor = booksCollection.find(query);
@@ -106,7 +105,20 @@ async function run() {
 }
 run().catch(console.dir)
 
+function verifyToken(token) {
+    let email;
+    jwt.verify(token, process.env.TOKEN_SECRET_KEY,
+        function (err, decoded) {
+            if (err) {
+                { email = 'your email is invalid' }
+            }
+            if (decoded) {
+                { email = decoded }
+            }
+        })
+    return email
 
+}
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
